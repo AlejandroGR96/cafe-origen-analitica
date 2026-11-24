@@ -1,14 +1,7 @@
 const ventas = require('./datos.js');
 
-function valorVentas(ventas) {
-    let total = 0;
-
-    for (let i = 0; i < ventas.length; i++) {
-        total += ventas[i].valor * ventas[i].cantidad;
-        //console.log(total)
-    }
-
-    return total;
+function valorVenta(venta) {
+    return venta.cantidad * venta.valor;
 }
 
 function totalVendido(ventas) {
@@ -25,8 +18,9 @@ function totalVendido(ventas) {
 
 }
 
+
 function unidadesVendidas(ventas) {
-    
+
     let total = 0;
 
     for (const venta of ventas) {
@@ -87,10 +81,128 @@ function ventasPorCiudad(ventas, ciudad) {
     return total;
 }
 
-console.log("Valor total de ventas:$", valorVentas(ventas));
+// Caso 3
+
+function totalVendidoM(ventas) {
+    return ventas
+        .filter(venta => venta.cantidad > 0)
+        .map(venta => valorVenta(venta))
+        .reduce((total, valor) => total + valor, 0);
+}
+
+
+function unidadesVendidasM(ventas) {
+    return ventas
+        .filter(venta => venta.cantidad > 0)
+        .map(venta => venta.cantidad)
+        .reduce((total, cantidad) => total + cantidad, 0);
+}
+
+
+function ventasPorCiudadM(ventas, ciudad) {
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    return ventas
+        .filter(venta =>
+            venta.cantidad > 0 &&
+            venta.ciudad.trim().toLowerCase() === ciudadBuscada
+        )
+        .map(venta => valorVenta(venta))
+        .reduce((total, valor) => total + valor, 0);
+}
+
+
+function totalPorCiudad(ventas) {
+    const agrupado = ventas.reduce((acumulador, venta) => {
+        const clave = venta.ciudad.trim().toLowerCase();
+
+        if (!acumulador[clave]) {
+            acumulador[clave] = {
+                ciudad: venta.ciudad.trim(),
+                total: 0
+            };
+        }
+
+        if (venta.cantidad > 0) {
+            acumulador[clave].total += valorVenta(venta);
+        }
+
+        return acumulador;
+
+    }, {});
+
+    return Object.entries(agrupado).reduce((resultado, [clave, dato]) => {
+        resultado[dato.ciudad] = dato.total;
+        return resultado;
+    }, {});
+}
+
+function unidadesPorProducto(ventas) {
+    return ventas.reduce((acumulador, venta) => {
+
+        if (!acumulador[venta.producto]) {
+            acumulador[venta.producto] = 0;
+        }
+
+        if (venta.cantidad > 0) {
+            acumulador[venta.producto] += venta.cantidad;
+        }
+
+        return acumulador;
+
+    }, {});
+}
+
+function topProductosPorValor(ventas, k) {
+
+    const agrupado = ventas.reduce((acumulador, venta) => {
+
+        if (!acumulador[venta.producto]) {
+            acumulador[venta.producto] = 0;
+        }
+
+        if (venta.cantidad > 0) {
+            acumulador[venta.producto] += valorVenta(venta);
+        }
+
+        return acumulador;
+
+    }, {});
+
+    const productos = Object.entries(agrupado).map(([producto, total]) => {
+        return {
+            producto: producto,
+            total: total
+        };
+    });
+
+    return [...productos]
+        .sort((a, b) => b.total - a.total)
+        .slice(0, k);
+}
+
+module.exports = {
+
+    valorVenta,
+    totalVendido,
+    unidadesVendidas,
+    ventaMayor,
+    ticketPromedio,
+    ventasPorCiudad,
+
+    totalVendidoM,
+    unidadesVendidasM,
+    ventasPorCiudadM,
+
+    totalPorCiudad,
+    unidadesPorProducto,
+    topProductosPorValor
+};
+
+//console.log("Valor total de ventas:$", valorVenta(ventas));
 console.log("Total Vendido:$", totalVendido(ventas))
 console.log("Unidades vendidas: ", unidadesVendidas(ventas))
 console.log("Venta mayor: \n", ventaMayor(ventas))
-console.log("Ticket Promedio: $",ticketPromedio(ventas).toFixed(2))
+console.log("Ticket Promedio: $", ticketPromedio(ventas).toFixed(2))
 console.log("Ventas Medellín: $", ventasPorCiudad(ventas, "medellín"));
 console.log("Ventas Bogotá: $", ventasPorCiudad(ventas, " Bogotá "));
