@@ -181,8 +181,43 @@ function topProductosPorValor(ventas, k) {
         .slice(0, k);
 }
 
+function ventasDelDia(ventas, fecha) {
+
+    // Filtrar las ventas de la fecha indicada
+    const ventasFecha = ventas.filter(venta =>
+        venta.fecha === fecha && venta.cantidad > 0
+    );
+
+    // Calcular el total de dinero vendido
+    const total = ventasFecha.reduce((acumulador, venta) => {
+        return acumulador + valorVenta(venta);
+    }, 0);
+
+    // Calcular las unidades vendidas
+    const unidades = ventasFecha.reduce((acumulador, venta) => {
+        return acumulador + venta.cantidad;
+    }, 0);
+
+    // Contar las ventas válidas
+    const cantidadVentas = ventasFecha.length;
+
+    // Evitar división entre cero
+    const promedio = cantidadVentas === 0
+        ? 0
+        : total / cantidadVentas;
+
+    return {
+        fecha: fecha,
+        cantidadVentas: cantidadVentas,
+        unidades: unidades,
+        total: total,
+        ticketPromedio: promedio
+    };
+}
+
 module.exports = {
 
+    //Funciones con ciclos
     valorVenta,
     totalVendido,
     unidadesVendidas,
@@ -190,13 +225,18 @@ module.exports = {
     ticketPromedio,
     ventasPorCiudad,
 
+    //Funciones con metodos
     totalVendidoM,
     unidadesVendidasM,
     ventasPorCiudadM,
 
+    //Agrupaciones y rankings
     totalPorCiudad,
     unidadesPorProducto,
-    topProductosPorValor
+    topProductosPorValor,
+
+    //Analisis por fecha
+    ventasDelDia
 };
 
 //console.log("Valor total de ventas:$", valorVenta(ventas));
@@ -206,3 +246,5 @@ console.log("Venta mayor: \n", ventaMayor(ventas))
 console.log("Ticket Promedio: $", ticketPromedio(ventas).toFixed(2))
 console.log("Ventas Medellín: $", ventasPorCiudad(ventas, "medellín"));
 console.log("Ventas Bogotá: $", ventasPorCiudad(ventas, " Bogotá "));
+console.log(ventasDelDia(ventas, "2026-09-01")); // Dia con ventas
+console.log(ventasDelDia(ventas, "2026-09-07")); // Dia sin Ventas
