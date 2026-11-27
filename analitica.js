@@ -18,7 +18,6 @@ function totalVendido(ventas) {
 
 }
 
-
 function unidadesVendidas(ventas) {
 
     let total = 0;
@@ -215,6 +214,170 @@ function ventasDelDia(ventas, fecha) {
     };
 }
 
+
+function primeraVentaI(ventas, contador) {
+
+    contador.operaciones++;
+
+    return ventas[0] || null;
+}
+
+
+function totalVendidoI(ventas, contador) {
+
+    let total = 0;
+
+    for (const venta of ventas) {
+
+        // Contamos la visita al registro
+        contador.operaciones++;
+
+        // Contamos la comparación cantidad > 0
+        contador.operaciones++;
+
+        if (venta.cantidad > 0) {
+            total += venta.cantidad * venta.valor;
+        }
+    }
+
+    return total;
+}
+
+
+function ventaMayorI(ventas, contador) {
+
+    if (ventas.length === 0) {
+        return null;
+    }
+
+    let mayor = ventas[0];
+
+    for (let i = 1; i < ventas.length; i++) {
+
+        const venta = ventas[i];
+
+        // Contamos la visita al registro
+        contador.operaciones++;
+
+        // Contamos la comparación entre importes
+        contador.operaciones++;
+
+        if (
+            venta.cantidad * venta.valor >
+            mayor.cantidad * mayor.valor
+        ) {
+            mayor = venta;
+        }
+    }
+
+    return mayor;
+}
+
+
+function totalPorCiudadI(ventas, contador) {
+
+    const agrupaciones = new Map();
+
+    for (const venta of ventas) {
+
+        // Contamos la visita al registro
+        contador.operaciones++;
+
+        const ciudad = venta.ciudad.trim().toLowerCase();
+
+        // Contamos la comparación cantidad > 0
+        contador.operaciones++;
+
+        if (venta.cantidad > 0) {
+
+            // Contamos la consulta para saber si existe la ciudad
+            contador.operaciones++;
+
+            if (agrupaciones.has(ciudad)) {
+
+                const grupo = agrupaciones.get(ciudad);
+
+                grupo.total += venta.cantidad * venta.valor;
+
+            } else {
+
+                agrupaciones.set(ciudad, {
+                    ciudad: venta.ciudad.trim(),
+                    total: venta.cantidad * venta.valor
+                });
+            }
+        }
+    }
+
+    const resultado = {};
+
+    for (const grupo of agrupaciones.values()) {
+        resultado[grupo.ciudad] = grupo.total;
+    }
+
+    return resultado;
+}
+
+
+function clientesRecurrentes(ventas) {
+
+    const recurrentes = [];
+
+    for (let i = 0; i < ventas.length; i++) {
+
+        for (let j = i + 1; j < ventas.length; j++) {
+
+            if (
+                ventas[i].cliente === ventas[j].cliente &&
+                !recurrentes.includes(ventas[i].cliente)
+            ) {
+                recurrentes.push(ventas[i].cliente);
+            }
+        }
+    }
+
+    return recurrentes;
+}
+
+
+function totalCiudadCadena(ventas, ciudad) {
+
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    return ventas
+        .map(venta => ({
+            ...venta,
+            ciudad: venta.ciudad.trim().toLowerCase()
+        }))
+        .filter(venta => venta.ciudad === ciudadBuscada)
+        .map(venta => venta.cantidad * venta.valor)
+        .reduce((total, valor) => total + valor, 0);
+}
+
+
+function totalCiudadUnaPasada(ventas, ciudad) {
+
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    let total = 0;
+
+    for (const venta of ventas) {
+
+        const ciudadVenta = venta.ciudad.trim().toLowerCase();
+
+        if (
+            ciudadVenta === ciudadBuscada &&
+            venta.cantidad > 0
+        ) {
+            total += venta.cantidad * venta.valor;
+        }
+    }
+
+    return total;
+}
+
+
+
 module.exports = {
 
     //Funciones con ciclos
@@ -236,7 +399,16 @@ module.exports = {
     topProductosPorValor,
 
     //Analisis por fecha
-    ventasDelDia
+    ventasDelDia,
+
+    primeraVentaI,
+    totalVendidoI,
+    ventaMayorI,
+    totalPorCiudadI,
+    clientesRecurrentes,
+    totalCiudadCadena,
+    totalCiudadUnaPasada
+
 };
 
 //console.log("Valor total de ventas:$", valorVenta(ventas));

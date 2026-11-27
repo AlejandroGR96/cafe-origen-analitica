@@ -81,3 +81,14 @@ verificar(
     JSON.stringify(ordenOriginal),
     JSON.stringify(ordenFinal)
 );
+
+
+const {
+    clientesRecurrentes
+} = require("./analitica.js");
+
+console.log("\nCLIENTES RECURRENTES");
+
+const resultado = clientesRecurrentes(ventas);
+
+console.log(resultado);
